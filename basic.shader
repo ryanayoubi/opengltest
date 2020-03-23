@@ -6,8 +6,8 @@ uniform mat4 view;
 uniform mat4 projection;
 
 void main()
-{   
-    gl_Position = projection * view * model * position;
+{
+	gl_Position = projection * view * model * position;
 };
 
 #version 330 core
@@ -16,6 +16,6 @@ uniform vec4 color;
 
 void main()
 {
-    FragColor = color;
-} 
+	FragColor = color;
+}
 #
