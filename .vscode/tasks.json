@@ -3,7 +3,7 @@
     "tasks": [
         {
             "type": "shell",
-            "label": "gcc build active file",
+            "label": "glfw build",
             "command": "gcc",
             "args": [
                 "-g",

@@ -177,12 +177,14 @@ int main(void)
 	float fov = 90.0f;
 
 	glm::vec3 cameraPos = glm::vec3(0.0f, 1.0f, 3.0f);
+	glm::vec3 cameraTrs = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 cameraFront = glm::normalize(cameraFront = glm::normalize(glm::vec3(cos(glm::radians(yaw)) * cos(glm::radians(pitch)), sin(glm::radians(pitch)), (-1) * sin(glm::radians(yaw)) * cos(glm::radians(pitch)))));
 	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 	float cameraSpeed = 0.3;
 	float vspeed = 0.0;
 	float vaccel = -0.03;
 	bool ground = true;
+	bool shift = false;
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -206,22 +208,59 @@ int main(void)
 		}
 		projection = glm::perspective(glm::radians(fov), 1920.0f / 1080.0f, 0.1f, 1000.0f);
 		glUniformMatrix4fv(projectionloc, 1, GL_FALSE, glm::value_ptr(projection));
-
-		if ((glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) && ground)
-			vspeed = 0.8;
-		ground = true;
 		if (cameraPos[1] != 1.0F)
+		{
 			ground = false;
-		cameraPos[1] += vspeed;
-		vspeed += vaccel;
+		}
+		else
+		{
+			ground = true;
+		}
+		if ((glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) && ground)
+		{
+			ground = false;
+			vspeed = 0.8;
+		}
+		if (!ground)
+		{
+			cameraPos[1] += vspeed;
+			vspeed += vaccel;
+		}
+		cameraTrs = glm::vec3(0, 0, 0);
+		shift = false;
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-			cameraPos += cameraSpeed * glm::normalize(glm::vec3(cameraFront[0], 0.0f, cameraFront[2]));
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-			cameraPos -= cameraSpeed * glm::normalize(glm::vec3(cameraFront[0], 0.0f, cameraFront[2]));
+		{
+			cameraTrs += cameraSpeed * glm::normalize(glm::vec3(cameraFront[0], 0.0f, cameraFront[2]));
+			shift = true;
+		}
+		else
+		{
+			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+			{
+				cameraTrs -= cameraSpeed * glm::normalize(glm::vec3(cameraFront[0], 0.0f, cameraFront[2]));
+				shift = true;
+			}
+		}
 		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-			cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-			cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+		{
+			cameraTrs -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+			shift = true;
+		}
+		else
+		{
+			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+			{
+				cameraTrs += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+				shift = true;
+			}
+		}
+		if (shift)
+		{
+			cameraTrs = cameraSpeed * glm::normalize(cameraTrs);
+		}
+		printf("%f ", (glm::length(cameraTrs)));
+		cameraPos += cameraTrs;
+		printf("%f %f %f\n", cameraPos[0], cameraPos[1], cameraPos[2]);
 		if (pitch > 89.0f)
 			pitch = 89.0f;
 		if (pitch < -89.0f)
